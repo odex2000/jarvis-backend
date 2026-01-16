@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
 import os
 from openai import OpenAI
@@ -50,3 +50,22 @@ def chat(req: ChatRequest):
 @app.get("/")
 def root():
     return {"status": "JARVIS backend online"}
+    
+@app.post("/ask")
+async def ask(request: Request):
+    data = await request.json()
+    prompt = data.get("prompt", "")
+
+    if not prompt:
+        return {"reply": "I need a question, master."}
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        reply = response.choices[0].message.content
+    except Exception as e:
+        reply = f"Error: {str(e)}"
+
+    return {"reply": reply}
