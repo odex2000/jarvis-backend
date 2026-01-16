@@ -72,8 +72,13 @@ async def ask(request: Request):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}]
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": prompt}
+    ]
+)
+
         )
         reply = response.choices[0].message.content
     except Exception as e:
