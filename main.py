@@ -50,8 +50,3 @@ def chat(req: ChatRequest):
 @app.get("/")
 def root():
     return {"status": "JARVIS backend online"}
-
-@app.get("/test-api-key")
-def test_key():
-    import os
-    return {"OPENAI_API_KEY": bool(os.getenv("OPENAI_API_KEY"))}
