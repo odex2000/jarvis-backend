@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel
 import os
 from openai import OpenAI
+USE_MOCK = os.getenv("USE_MOCK", "true").lower() == "true"
 
 app = FastAPI()
 
@@ -65,14 +66,26 @@ def root():
 @app.post("/ask")
 async def ask(request: Request):
     data = await request.json()
-    prompt = data.get("prompt", "")
+    prompt = data.get("prompt", "").strip()
 
     if not prompt:
-        return {"reply": "I need a question, master."}
+        return {"reply": "I require an instruction, master. Silence is rarely productive."}
 
+    # 🧠 MOCK MODE RESPONSE
+    if USE_MOCK:
+        return {
+            "reply": (
+                "Certainly, master. I have received your request:\n\n"
+                f"“{prompt}”\n\n"
+                "While my higher cognitive functions are currently operating in simulation mode, "
+                "rest assured that my wit, loyalty, and mild condescension remain fully operational."
+            )
+        }
+
+    # 🤖 REAL OPENAI MODE (disabled for now)
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
