@@ -22,7 +22,7 @@ app.add_middleware(
 )
 
 # OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = None if not USE_MOCK:     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # System prompt
 SYSTEM_PROMPT = """
