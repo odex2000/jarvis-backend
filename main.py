@@ -51,7 +51,8 @@ class ChatRequest(BaseModel):
     message: str
 
 # Memory functions
-def load_memory():
+def load_memory() -> dict:
+    """Load JARVIS memory from file. Returns a dictionary with profile, preferences, and notes."""
     if not os.path.exists(MEMORY_FILE):
         return {"profile": {}, "preferences": {}, "notes": []}
     with open(MEMORY_FILE, "r") as f:
@@ -134,10 +135,13 @@ async def forget(request: Request):
         return {"status": "Unknown category, master."}
 
     memory = load_memory()
+
     if category in ["profile", "preferences"]:
         key = data.get("key")
         if key and key in memory[category]:
             del memory[category][key]
+        save_memory(memory)  # <-- added here
+
     elif category == "notes":
         index = data.get("index")
         if index is not None and 0 <= index < len(memory["notes"]):
@@ -145,5 +149,5 @@ async def forget(request: Request):
             save_memory(memory)
             return {"status": "Memory forgotten", "message": f"I have forgotten the memory: '{removed['content']}', master."}
 
-    save_memory(memory)
     return {"status": "Memory forgotten", "message": "Requested memory cleared, master."}
+
