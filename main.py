@@ -4,12 +4,15 @@ from datetime import datetime
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from openai import OpenAI
+try:
+    from openai import OpenAI
+except Exception:
+    OpenAI = None
 
 # ==========================
 # CONFIGURATION
 # ==========================
-USE_MOCK = os.getenv("USE_MOCK", "true").lower() == "true"
+USE_MOCK = os.getenv("USE_MOCK", "true").strip().lower() == "true"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MEMORY_FILE = "memory.json"
 
@@ -30,11 +33,17 @@ app.add_middleware(
 
 # OpenAI Client
 client = None
-if not USE_MOCK:
-    if not OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY is required when USE_MOCK=false")
-    client = OpenAI(api_key=OPENAI_API_KEY)
 
+if not USE_MOCK:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "OPENAI_API_KEY is required when USE_MOCK=false"
+        )
+    if OpenAI is None:
+        raise RuntimeError("OpenAI SDK not installed")
+    client = OpenAI(api_key=api_key)
+    
 # ==========================
 # SYSTEM PROMPT
 # ==========================
